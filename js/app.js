@@ -35,17 +35,16 @@ function initIntroAndMusic() {
        height: '1',
        width: '1',
        videoId: 'rtOvBOTyX00',
-       playerVars: {
-         autoplay: 1,
-         controls: 0,
-         loop: 1,
-         playlist: 'rtOvBOTyX00',
-         rel: 0,
-         modestbranding: 1,
-         playsinline: 1,
-         mute: 1,
-         origin: window.location.origin
-       },
+        playerVars: {
+          controls: 0,
+          loop: 1,
+          playlist: 'rtOvBOTyX00',
+          rel: 0,
+          modestbranding: 1,
+          playsinline: 1,
+          mute: 1,
+          origin: window.location.origin
+        },
        events: {
         onReady: function () {
           ytReady = true;
