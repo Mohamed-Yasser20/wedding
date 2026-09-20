@@ -231,7 +231,12 @@ function initRsvpForm() {
     }
 
     // إرسال عبر EmailJS
-    emailjs.sendForm('service_ubfkc2j', 'template_b5sp2lh', form)
+    emailjs.send('service_ubfkc2j', 'template_b5sp2lh', {
+      guest_name: guestName,
+      attending: attending,
+      guest_message: messageInput ? messageInput.value.trim() : '',
+      to_email: 'my5444786@gmail.com, Kholodyasser513@gmail.com, omar.khaled2014@feps.edu.eg'
+    })
       .then(() => {
         // نجاح ✅
         if (successMsg) {
