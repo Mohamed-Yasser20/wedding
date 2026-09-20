@@ -15,79 +15,39 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /* ================================================================
-   1. الشاشة الافتتاحية وتشغيل الموسيقى (Intro & YouTube Audio Controller)
+   1. الشاشة الافتتاحية وتشغيل الموسيقى (Intro & HTML5 Audio)
    ================================================================ */
 function initIntroAndMusic() {
   const introEl = document.getElementById('intro-screen');
   const introVideo = document.getElementById('intro-video');
   const introPlayBtn = document.getElementById('intro-play-btn');
   const musicBtn = document.getElementById('music-toggle-btn');
+  const bgMusic = document.getElementById('bg-music');
 
   let isMusicPlaying = false;
   let hasOpened = false;
-  let ytPlayer = null;
-  let ytReady = false;
 
-  // ── YouTube IFrame API ──────────────────────────────────────
-  let hasUnmuted = false;
-  window.onYouTubeIframeAPIReady = function () {
-     ytPlayer = new YT.Player('yt-player', {
-       height: '1',
-       width: '1',
-       videoId: 'rtOvBOTyX00',
-        playerVars: {
-          controls: 0,
-          loop: 1,
-          playlist: 'rtOvBOTyX00',
-          rel: 0,
-          modestbranding: 1,
-          playsinline: 1,
-          mute: 1,
-          origin: window.location.origin
-        },
-       events: {
-        onReady: function () {
-          ytReady = true;
-          ytPlayer.setVolume(80);
-          playMusic();
-        },
-        onStateChange: function (e) {
-          if (e.data === YT.PlayerState.PLAYING) {
-            isMusicPlaying = true;
-            if (musicBtn) {
-              musicBtn.classList.add('is-playing');
-              musicBtn.setAttribute('aria-label', 'إيقاف الموسيقى');
-              musicBtn.innerHTML = '♫';
-            }
-          } else if (
-            e.data === YT.PlayerState.PAUSED ||
-            e.data === YT.PlayerState.ENDED
-          ) {
-            isMusicPlaying = false;
-            if (musicBtn) {
-              musicBtn.classList.remove('is-playing');
-              musicBtn.setAttribute('aria-label', 'تشغيل الموسيقى');
-              musicBtn.innerHTML = '♪';
-            }
-          }
-        }
+  if (bgMusic) {
+    bgMusic.volume = 0.8;
+    bgMusic.loop = true;
+  }
+
+  function playMusic() {
+    if (!bgMusic) return;
+    bgMusic.volume = 0.8;
+    bgMusic.play().then(() => {
+      isMusicPlaying = true;
+      if (musicBtn) {
+        musicBtn.classList.add('is-playing');
+        musicBtn.setAttribute('aria-label', 'إيقاف الموسيقى');
+        musicBtn.innerHTML = '♫';
       }
-    });
-  };
-
-   function playMusic() {
-     if (!ytPlayer || !ytReady) return;
-     try { ytPlayer.playVideo(); } catch (e) {}
-   }
-
-   function unmuteMusic() {
-     if (!ytPlayer || !ytReady) return;
-     try { ytPlayer.unmute(); } catch (e) {}
-   }
+    }).catch(() => {});
+  }
 
   function pauseMusic() {
-    if (!ytPlayer || !ytReady) return;
-    try { ytPlayer.pauseVideo(); } catch (e) {}
+    if (!bgMusic) return;
+    bgMusic.pause();
     isMusicPlaying = false;
     if (musicBtn) {
       musicBtn.classList.remove('is-playing');
@@ -96,35 +56,32 @@ function initIntroAndMusic() {
     }
   }
 
-   // تبديل تشغيل الموسيقى من الزر العائم
-   if (musicBtn) {
-     musicBtn.addEventListener('click', (e) => {
-       e.stopPropagation();
-       if (isMusicPlaying) {
-         pauseMusic();
-       } else {
-         playMusic();
-         unmuteMusic();
-       }
-     });
-   }
+  function toggleMusic() {
+    if (isMusicPlaying) {
+      pauseMusic();
+    } else {
+      playMusic();
+    }
+  }
 
-  // فتح الدعوة وتشغيل فيديو فتح الظرف
+  if (musicBtn) {
+    musicBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMusic();
+    });
+  }
+
   function openInvitation() {
     if (hasOpened) return;
     hasOpened = true;
 
-    // بدء تشغيل الموسيقى فور الضغط
     playMusic();
-    unmuteMusic();
 
-    // تشغيل فيديو فتح الظرف
     if (introVideo) {
       introVideo.muted = true;
       const playPromise = introVideo.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
-          // انتظار انتهاء الفيديو أو مهلة 2.8 ثانية ثم إخفاء الشاشة الافتتاحية
           introVideo.addEventListener('ended', finishIntro, { once: true });
           setTimeout(finishIntro, 3200);
         }).catch(() => {
@@ -142,13 +99,11 @@ function initIntroAndMusic() {
     if (!introEl) return;
     introEl.classList.add('is-open');
     document.body.style.overflow = '';
-    
-    // تشغيل التمرير التلقائي الفاخر بعد فتح الدعوة
+
     if (typeof window.__startAutoScroll === 'function') {
       window.__startAutoScroll();
     }
 
-    // إزالة الشاشة بعد اكتمال التلاشي
     setTimeout(() => {
       introEl.style.display = 'none';
     }, 800);
@@ -161,20 +116,11 @@ function initIntroAndMusic() {
     });
   }
 
-   if (introEl) {
-     introEl.addEventListener('click', () => {
-       openInvitation();
-     });
-   }
-
-  // إلغاء الكتم عند أول تفاعل من المستخدم
-  document.addEventListener('click', function unmuteOnFirstClick() {
-    if (!hasUnmuted && ytPlayer && ytReady) {
-      hasUnmuted = true;
-      try { ytPlayer.unmute(); } catch (e) {}
-      document.removeEventListener('click', unmuteOnFirstClick);
-    }
-  });
+  if (introEl) {
+    introEl.addEventListener('click', () => {
+      openInvitation();
+    });
+  }
 }
 
 
