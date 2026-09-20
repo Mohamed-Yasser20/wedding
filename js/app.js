@@ -29,27 +29,28 @@ function initIntroAndMusic() {
   let ytReady = false;
 
   // ── YouTube IFrame API ──────────────────────────────────────
+  let hasUnmuted = false;
   window.onYouTubeIframeAPIReady = function () {
-    ytPlayer = new YT.Player('yt-player', {
-      height: '1',
-      width: '1',
-      videoId: 'rtOvBOTyX00',
-      playerVars: {
-        autoplay: 0,
-        controls: 0,
-        loop: 1,
-        playlist: 'rtOvBOTyX00',
-        rel: 0,
-        modestbranding: 1,
-        playsinline: 1,
-        origin: window.location.origin
-      },
-      events: {
+     ytPlayer = new YT.Player('yt-player', {
+       height: '1',
+       width: '1',
+       videoId: 'rtOvBOTyX00',
+       playerVars: {
+         autoplay: 1,
+         controls: 0,
+         loop: 1,
+         playlist: 'rtOvBOTyX00',
+         rel: 0,
+         modestbranding: 1,
+         playsinline: 1,
+         mute: 1,
+         origin: window.location.origin
+       },
+       events: {
         onReady: function () {
           ytReady = true;
           ytPlayer.setVolume(80);
-          // لو فُتحت الدعوة قبل تحميل API
-          if (hasOpened) playMusic();
+          playMusic();
         },
         onStateChange: function (e) {
           if (e.data === YT.PlayerState.PLAYING) {
@@ -75,10 +76,15 @@ function initIntroAndMusic() {
     });
   };
 
-  function playMusic() {
-    if (!ytPlayer || !ytReady) return;
-    try { ytPlayer.playVideo(); } catch (e) {}
-  }
+   function playMusic() {
+     if (!ytPlayer || !ytReady) return;
+     try { ytPlayer.playVideo(); } catch (e) {}
+   }
+
+   function unmuteMusic() {
+     if (!ytPlayer || !ytReady) return;
+     try { ytPlayer.unmute(); } catch (e) {}
+   }
 
   function pauseMusic() {
     if (!ytPlayer || !ytReady) return;
@@ -91,17 +97,18 @@ function initIntroAndMusic() {
     }
   }
 
-  // تبديل تشغيل الموسيقى من الزر العائم
-  if (musicBtn) {
-    musicBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (isMusicPlaying) {
-        pauseMusic();
-      } else {
-        playMusic();
-      }
-    });
-  }
+   // تبديل تشغيل الموسيقى من الزر العائم
+   if (musicBtn) {
+     musicBtn.addEventListener('click', (e) => {
+       e.stopPropagation();
+       if (isMusicPlaying) {
+         pauseMusic();
+       } else {
+         playMusic();
+         unmuteMusic();
+       }
+     });
+   }
 
   // فتح الدعوة وتشغيل فيديو فتح الظرف
   function openInvitation() {
@@ -110,6 +117,7 @@ function initIntroAndMusic() {
 
     // بدء تشغيل الموسيقى فور الضغط
     playMusic();
+    unmuteMusic();
 
     // تشغيل فيديو فتح الظرف
     if (introVideo) {
@@ -154,11 +162,20 @@ function initIntroAndMusic() {
     });
   }
 
-  if (introEl) {
-    introEl.addEventListener('click', () => {
-      openInvitation();
-    });
-  }
+   if (introEl) {
+     introEl.addEventListener('click', () => {
+       openInvitation();
+     });
+   }
+
+  // إلغاء الكتم عند أول تفاعل من المستخدم
+  document.addEventListener('click', function unmuteOnFirstClick() {
+    if (!hasUnmuted && ytPlayer && ytReady) {
+      hasUnmuted = true;
+      try { ytPlayer.unmute(); } catch (e) {}
+      document.removeEventListener('click', unmuteOnFirstClick);
+    }
+  });
 }
 
 
@@ -302,6 +319,26 @@ function initRsvpForm() {
 }
 
 
+function getScrollEl() {
+  return (document.scrollingElement || document.body);
+}
+
+function setScrollTop(val) {
+  const el = getScrollEl();
+  if (el === document.body) {
+    window.scrollTo(0, val);
+    document.body.scrollTop = val;
+    document.documentElement.scrollTop = val;
+  } else {
+    el.scrollTop = val;
+  }
+}
+
+function getScrollTop() {
+  const el = getScrollEl();
+  return el === document.body ? (window.pageYOffset || document.documentElement.scrollTop) : el.scrollTop;
+}
+
 /* ================================================================
    5. زر الصعود لأعلى (Back To Top Button)
    ================================================================ */
@@ -310,7 +347,7 @@ function initScrollTop() {
   if (!scrollTopBtn) return;
 
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
+    if (getScrollTop() > 400) {
       scrollTopBtn.classList.add('is-visible');
     } else {
       scrollTopBtn.classList.remove('is-visible');
@@ -318,7 +355,18 @@ function initScrollTop() {
   }, { passive: true });
 
   scrollTopBtn.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const st = getScrollTop();
+    const duration = 300;
+    const startTime = performance.now();
+    function animateScroll(now) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
+      const newScroll = st * (1 - ease);
+      setScrollTop(newScroll);
+      if (progress < 1) requestAnimationFrame(animateScroll);
+    }
+    requestAnimationFrame(animateScroll);
   });
 }
 
@@ -351,8 +399,9 @@ function initAutoScroll() {
   const btn = document.getElementById("autoscroll-btn");
 
   function atBottom() {
-    const el = document.scrollingElement || document.documentElement;
-    return el.scrollTop + window.innerHeight >= el.scrollHeight - 4;
+    const el = getScrollEl();
+    const st = getScrollTop();
+    return st + window.innerHeight >= el.scrollHeight - 4;
   }
 
   function frame(now) {
@@ -365,12 +414,12 @@ function initAutoScroll() {
     const step = Math.floor(carry);
     if (step >= 1) {
       carry -= step;
-      window.scrollBy({ top: step, behavior: "auto" });
+      setScrollTop(getScrollTop() + step);
     }
 
     if (atBottom()) {
       if (loop) {
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        setScrollTop(0);
         carry = 0;
       } else {
         stop(true);

@@ -41,21 +41,27 @@
 }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  scroll-behavior: smooth;
+   -webkit-text-size-adjust: 100%;
+   text-size-adjust: 100%;
+   -webkit-overflow-scrolling: touch;
+   overflow-scrolling: touch;
 }
 
 body {
-  margin: 0;
-  padding: 0;
-  background-color: #030a16;
-  color: var(--text-light);
-  font-family: var(--font-arabic-body);
-  direction: rtl;
-  text-align: right;
-  -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+   margin: 0;
+   padding: 0;
+   background-color: #030a16;
+   color: var(--text-light);
+   font-family: var(--font-arabic-body);
+   direction: rtl;
+   text-align: right;
+   -webkit-font-smoothing: antialiased;
+   overflow-x: hidden;
+   position: relative;
+}
+
+html, body {
+   -webkit-overflow-scrolling: touch;
 }
 
 /* ================================================================
