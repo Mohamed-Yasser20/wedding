@@ -230,41 +230,41 @@ function initRsvpForm() {
       submitBtn.style.opacity = '0.7';
     }
 
-    // إرسال عبر EmailJS
-    emailjs.send('service_ubfkc2j', 'template_b5sp2lh', {
+    // إرسال عبر EmailJS لكل مستلم
+    const templateVars = {
       guest_name: guestName,
       attending: attending,
-      guest_message: messageInput ? messageInput.value.trim() : '',
-      to_email: 'my5444786@gmail.com, Kholodyasser513@gmail.com, omar.khaled2014@feps.edu.eg'
-    })
-      .then(() => {
-        // نجاح ✅
-        if (successMsg) {
-          if (attending === 'yes') {
-            successMsg.innerHTML = `✨ أهلاً وسهلاً بك يا <strong>${guestName || 'ضيفنا العزيز'}</strong>! سعداء جداً بتشريفك لحفل زفافنا.`;
-          } else {
-            successMsg.innerHTML = `شكراً لك يا <strong>${guestName || 'عزيزنا'}</strong> على تهنئتك الرقيقة، تمنينا تواجدك معنا!`;
-          }
-          successMsg.style.display = 'block';
+      guest_message: messageInput ? messageInput.value.trim() : ''
+    };
+    const recipients = ['my5444786@gmail.com', 'Kholodyasser513@gmail.com', 'omar.khaled2014@feps.edu.eg'];
+    const sendPromises = recipients.map(function(toEmail) {
+      return emailjs.send('service_ubfkc2j', 'template_b5sp2lh', Object.assign({}, templateVars, { to_email: toEmail }))
+        .catch(function(err) { console.error('EmailJS error for ' + toEmail + ':', err); });
+    });
+    Promise.all(sendPromises).then(function() {
+      if (successMsg) {
+        if (attending === 'yes') {
+          successMsg.innerHTML = `✨ أهلاً وسهلاً بك يا <strong>${guestName || 'ضيفنا العزيز'}</strong>! سعداء جداً بتشريفك لحفل زفافنا.`;
+        } else {
+          successMsg.innerHTML = `شكراً لك يا <strong>${guestName || 'عزيزنا'}</strong> على تهنئتك الرقيقة، تمنينا تواجدك معنا!`;
         }
-        if (submitBtn) {
-          submitBtn.textContent = 'تم إرسال الرد بنجاح ✓';
-        }
-      })
-      .catch((err) => {
-        // خطأ ❌
-        console.error('EmailJS error:', err);
-        if (successMsg) {
-          successMsg.innerHTML = '⚠️ حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى.';
-          successMsg.style.display = 'block';
-          successMsg.style.color = '#e74c3c';
-        }
-        if (submitBtn) {
-          submitBtn.textContent = 'بكل سرور';
-          submitBtn.disabled = false;
-          submitBtn.style.opacity = '1';
-        }
-      });
+        successMsg.style.display = 'block';
+      }
+      if (submitBtn) {
+        submitBtn.textContent = 'تم إرسال الرد بنجاح ✓';
+      }
+    }).catch(function() {
+      if (successMsg) {
+        successMsg.innerHTML = '⚠️ حدث خطأ أثناء الإرسال، يرجى المحاولة مرة أخرى.';
+        successMsg.style.display = 'block';
+        successMsg.style.color = '#e74c3c';
+      }
+      if (submitBtn) {
+        submitBtn.textContent = 'بكل سرور';
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
+      }
+    });
   });
 }
 
