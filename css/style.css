@@ -957,7 +957,7 @@ html, body {
 }
 
 .rsvp-heading {
-  font-family: var(--font-arabic-body);
+  font-family: var(--font-arabic-heading);
   font-size: 26px;
   letter-spacing: 0.15em;
   color: var(--navy-royal);
@@ -978,7 +978,7 @@ html, body {
 }
 
 .rsvp-label {
-  font-family: var(--font-arabic-body);
+  font-family: var(--font-arabic-heading);
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -994,7 +994,7 @@ html, body {
   color: var(--navy-dark);
   border: 1.5px solid rgba(23, 41, 87, 0.45);
   border-radius: 12px;
-  font-family: var(--font-arabic-body);
+  font-family: var(--font-arabic-heading);
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -1022,7 +1022,7 @@ html, body {
   border-radius: 999px;
   background: #fffdf8;
   color: var(--navy-royal);
-  font-family: var(--font-arabic-body);
+  font-family: var(--font-arabic-heading);
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -1048,7 +1048,7 @@ html, body {
   color: #fffdf8;
   border: 1px solid #071733;
   border-radius: 999px;
-  font-family: var(--font-arabic-body);
+  font-family: var(--font-arabic-heading);
   font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.18em;
