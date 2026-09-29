@@ -8,7 +8,6 @@
 document.addEventListener('DOMContentLoaded', () => {
   initIntroAndMusic();
   initCountdown();
-  initTimelineRunner();
   initRsvpForm();
   initScrollTop();
   initAutoScroll();
@@ -79,16 +78,17 @@ function initIntroAndMusic() {
 
     if (introVideo) {
       introVideo.muted = true;
+      introVideo.playbackRate = 1.8;
       const playPromise = introVideo.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
           introVideo.addEventListener('ended', finishIntro, { once: true });
-          setTimeout(finishIntro, 3200);
+          setTimeout(finishIntro, 1100);
         }).catch(() => {
           finishIntro();
         });
       } else {
-        setTimeout(finishIntro, 2500);
+        setTimeout(finishIntro, 900);
       }
     } else {
       finishIntro();
@@ -106,7 +106,7 @@ function initIntroAndMusic() {
 
     setTimeout(() => {
       introEl.style.display = 'none';
-    }, 800);
+    }, 400);
   }
 
   if (introPlayBtn) {
@@ -162,48 +162,7 @@ function initCountdown() {
 }
 
 /* ================================================================
-   3. متتبع التمرير في الجدول الزمني (Interactive Timeline Star Runner)
-   ================================================================ */
-function initTimelineRunner() {
-  const track = document.getElementById('timeline-track');
-  const runner = document.getElementById('timeline-runner');
-
-  if (!track || !runner) return;
-
-  let ticking = false;
-
-  function updateRunner() {
-    ticking = false;
-    const rect = track.getBoundingClientRect();
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
-
-    const start = viewportHeight * 0.75;
-    const end = viewportHeight * 0.25;
-    const denominator = rect.height + start - end;
-
-    if (denominator <= 0) return;
-
-    let progress = (start - rect.top) / denominator;
-    progress = Math.max(0, Math.min(1, progress));
-
-    const runnerHeight = runner.offsetHeight || 24;
-    const travel = Math.max(0, rect.height - runnerHeight - 16);
-
-    runner.style.top = (10 + travel * progress) + 'px';
-  }
-
-  window.addEventListener('scroll', () => {
-    if (!ticking) {
-      ticking = true;
-      requestAnimationFrame(updateRunner);
-    }
-  }, { passive: true });
-
-  updateRunner();
-}
-
-/* ================================================================
-   4. نموذج تأكيد الحضور (RSVP Form + EmailJS)
+   3. نموذج تأكيد الحضور (RSVP Form + EmailJS)
    ================================================================ */
 function initRsvpForm() {
   const form = document.getElementById('rsvp-form');
@@ -290,7 +249,7 @@ function getScrollTop() {
 }
 
 /* ================================================================
-   5. زر الصعود لأعلى (Back To Top Button)
+   4. زر الصعود لأعلى (Back To Top Button)
    ================================================================ */
 function initScrollTop() {
   const scrollTopBtn = document.getElementById('scroll-top-btn');
@@ -321,7 +280,7 @@ function initScrollTop() {
 }
 
 /* ================================================================
-   6. محرك التمرير التلقائي السينمائي (Cinematic Auto-Scroll Engine)
+   5. محرك التمرير التلقائي السينمائي (Cinematic Auto-Scroll Engine)
    ================================================================ */
 function initAutoScroll() {
   const node = document.getElementById("invite-scroll");
